@@ -13,20 +13,12 @@ if [ -z "$METERID" ]; then
   exit 0
 fi
 
-# Setup for Metric/CCF
-UNIT_DIVISOR=10000
-UNIT="CCF" # Hundred cubic feet
-if [ ! -z "$METRIC" ]; then
-  echo "Setting meter to metric readings"
-  UNIT_DIVISOR=1000
-  UNIT="Cubic Meters"
-fi
-
 # Kill this script (and restart the container) if we haven't seen an update in 30 minutes
 # Nasty issue probably related to a memory leak, but this works really well, so not changing it
 ./watchdog.sh 30 updated.log &
 
 while true; do
+  echo start reading: `date`
   # Suppress the very verbose output of rtl_tcp and background the process
   rtl_tcp &> /dev/null &
   rtl_tcp_pid=$! # Save the pid for murder later
@@ -35,21 +27,24 @@ while true; do
   json=$(rtlamr -msgtype=r900 -filterid=$METERID -single=true -format=json)
   echo "Meter info: $json"
 
-  consumption=$(echo $json | python -c "import json,sys;obj=json.load(sys.stdin);print float(obj[\"Message\"][\"Consumption\"])/$UNIT_DIVISOR")
-  echo "Current consumption: $consumption $UNIT"
+  consumption=$(echo $json | python -c "import json,sys;obj=json.load(sys.stdin);print float(obj[\"Message\"][\"Consumption\"])/10.0")
+  echo "Current consumption: $consumption gal"
 
   # Replace with your custom logging code
   if [ ! -z "$CURL_API" ]; then
     echo "Logging to custom API"
-    # For example, CURL_API would be "https://mylogger.herokuapp.com?value="
-    # Currently uses a GET request
-    curl -L "$CURL_API$consumption"
+    CURL="curl -i -XPOST $URI/api/v2/write?bucket=h2o --data-binary 'gal,id=$METERID value=$consumption'"
+    echo $CURL
+    eval $CURL
   fi
 
   kill $rtl_tcp_pid # rtl_tcp has a memory leak and hangs after frequent use, restarts required - https://github.com/bemasher/rtlamr/issues/49
-  sleep 60 # I don't need THAT many updates
 
   # Let the watchdog know we've done another cycle
-  touch updated.log
+  #echo $json >updated.log
+  if [ ! -z `echo $json | wc -w` ]; then touch updated.log; fi
+  # wait until next read
+  # 60*15=900 do @ 0,15,30,45 on the hour
+  sleep $((900 - $(date +%s) % 900))
 done
 
