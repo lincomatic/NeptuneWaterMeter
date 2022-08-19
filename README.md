@@ -1,6 +1,8 @@
 # Raspberry Pi tracker for Neptune R900 smart water meters
 ### Works for City of Atlanta and many other municipalities
 
+## This fork posts to InfluxDB instead of a google spreadsheet
+
 [See an example](https://docs.google.com/spreadsheets/d/1XC9UFRQpvzUn7gjXML7KuaprB8APLXgE_EjsmUM8MWI/edit?usp=sharing) (Please don't judge me by my water usage)
 
 ## Introduction
