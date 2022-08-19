@@ -33,7 +33,7 @@ while true; do
   # Replace with your custom logging code
   if [ ! -z "$CURL_API" ]; then
     echo "Logging to custom API"
-    CURL="curl -i -XPOST $URI/api/v2/write?bucket=h2o --data-binary 'gal,id=$METERID value=$consumption'"
+    CURL="curl -i -XPOST $URI/api/v2/write?bucket=h2o --data-binary 'h2o,id=$METERID gal=$consumption'"
     echo $CURL
     eval $CURL
   fi
