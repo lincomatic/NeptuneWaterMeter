@@ -41,7 +41,7 @@ You'll need to be able to do the following to get this to work:
 1. In Resin, view the logs on your device and find your meter ID. This is hardest part. You'll need to know your current reading to match it up to the meter ID. I've not found any correlation between what's written on the meter and the ID being sent out over the air.
 1. Once you find your meter ID, enter it as an environment variable in the Resin dashboard under "METERID"
 1. enter the URI of your InfluxDB, e.g. http://192.168.1.25:8086 under "URI"
-1. At this point it's up to you as to where you want to 'send' the data. I log to a Google Spreadsheet and have provided instructions at the end of this README
+1. At this point it's up to you as to how you want to view the data. I use Grafana
 
 ## InfluxDB
 
